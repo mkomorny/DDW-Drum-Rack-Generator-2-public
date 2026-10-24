@@ -1,0 +1,37 @@
+{
+  "name": "ddw-drum-rack-generator",
+  "version": "1.2.1",
+  "description": "Scans a sample library, classifies samples by type and category, and generates a randomized, lockable 16-pad Ableton Drum Rack (.adg export).",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "build:skeleton": "node electron/export/buildSkeleton.js",
+    "dist:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^43.4.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.ddw.drumrackgenerator",
+    "productName": "DDW Drum Rack Generator",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    }
+  }
+}

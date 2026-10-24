@@ -1,0 +1,64 @@
+/*
+  Design tokens — extracted from the approved mockup:
+  "DDW Drum Rack Generator — Ableton Device UI (Redesigned Types Dropdown).html"
+  See docs/DESIGN.md for the full rationale behind each choice.
+*/
+
+:root {
+  /* Surface ladder — each nested container gets one step lighter.
+     This is what reads as "device chrome" rather than flat panels. */
+  --surface-rail: #141414;
+  --surface-viewport: #181818;
+  --surface-layout: #1a1a1a;
+  --surface-panel: #202020;
+  --surface-panel-alt: #191919;   /* dropzone, alias box, info rows */
+  --surface-pad: #262626;
+  --surface-pad-hover: #2e2e2e;
+  --surface-input: #15161c;       /* type dropdown well */
+  --surface-titlebar: #2d2d2d;
+  --surface-frame: #232323;
+
+  --border-subtle: #2c2c2c;
+  --border-layout: #2e2e2e;
+  --border-pad: #363636;
+  --border-pad-hover: #555555;
+  --border-input: #3d4354;
+  --border-titlebar: #1a1a1a;
+
+  --text: #eeeeee;
+  --text-row: #cccccc;
+  --text-dim: #999999;
+  --text-faint: #888888;
+  --text-fainter: #666666;
+
+  /* The single accent. Amber means: active, yours, or clickable.
+     It never appears on anything passive or informational. */
+  --accent: #e5a93c;
+  --accent-hover: #f5ba52;
+  --accent-glow: rgba(229, 169, 60, 0.25);
+  --accent-glow-strong: rgba(229, 169, 60, 0.3);
+  --accent-locked-bg: #2a251c;
+
+  /* Category hues — label content, never state.
+     Formula: 20%-alpha fill background + full-strength text. */
+  --cat-kick: #f59e0b;
+  --cat-snare: #f43f5e;
+  --cat-hat: #38bdf8;
+  --cat-perc: #c084fc;
+  --cat-808: #eab308;
+
+  --status-ok-bg: #17241f;
+  --status-ok-border: #244637;
+  --status-ok-text: #72d9aa;
+
+  --status-empty-bg: rgba(239, 68, 68, 0.1);
+  --status-empty-text: #f87171;
+
+  --reset-border: #443224;
+  --reset-text: #d97706;
+  --reset-hover-bg: rgba(217, 119, 6, 0.15);
+  --reset-hover-text: #f59e0b;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+}

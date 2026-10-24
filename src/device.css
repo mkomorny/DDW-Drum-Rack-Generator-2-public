@@ -1,0 +1,639 @@
+/*
+  Device chrome — the Ableton-style frame and its four rail tabs.
+  Rebuilt from docs/DESIGN.md, not copy-pasted from the source mockup.
+  Only the device itself ships in this app; the mockup's showcase-page
+  wrapper (gallery cards, badges) was presentation scaffolding, not product.
+*/
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: var(--surface-viewport);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* ---- Frame ---- */
+
+.ableton-device-frame {
+  background: var(--surface-frame);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.ableton-title-bar {
+  background: var(--surface-titlebar);
+  border-bottom: 1px solid var(--border-titlebar);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: var(--text-faint);
+  -webkit-app-region: drag;
+}
+
+.device-power-led {
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 6px var(--accent);
+  margin-right: 8px;
+}
+
+.device-name {
+  color: var(--text);
+  font-weight: bold;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Viewport / layout grid ---- */
+
+.device-viewport {
+  flex: 1;
+  background: var(--surface-viewport);
+  padding: 14px;
+  display: grid;
+  min-height: 0;
+}
+
+.c1-layout {
+  display: grid;
+  grid-template-columns: 52px 260px 160px 1fr;
+  gap: 12px;
+  background: var(--surface-layout);
+  border-radius: 6px;
+  padding: 12px;
+  border: 1px solid var(--border-layout);
+  min-height: 0;
+}
+
+/* ---- Rail ---- */
+
+.c1-rail {
+  background: var(--surface-rail);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 3px;
+}
+
+.c1-rail-btn {
+  height: 54px;
+  background: transparent;
+  border: none;
+  color: var(--text-fainter);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-mono);
+  gap: 3px;
+}
+
+.c1-rail-btn span.label { font-size: 0.62rem; text-transform: uppercase; }
+.c1-rail-btn:hover { color: var(--text-row); background: #1e1e1e; }
+.c1-rail-btn.active {
+  background: #2a2a2a;
+  color: var(--accent);
+  border-left: 3px solid var(--accent);
+}
+
+/* ---- Left panel (dynamic per tab) ---- */
+
+.c1-panel {
+  background: var(--surface-panel);
+  border-radius: 5px;
+  border: 1px solid var(--border-subtle);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.panel-heading {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-row);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  letter-spacing: 0.02em;
+}
+
+/* Folder / packs tab */
+
+.c1-dropzone {
+  border: 1px dashed #444;
+  border-radius: 5px;
+  padding: 14px 10px;
+  text-align: center;
+  color: var(--text-faint);
+  background: var(--surface-panel-alt);
+  margin-bottom: 10px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.c1-dropzone:hover { border-color: var(--accent); color: var(--text-row); }
+.c1-dropzone.dragover { border-color: var(--accent); color: var(--accent); background: var(--surface-pad); }
+
+.c1-pack-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.c1-pack-item {
+  background: #262626;
+  padding: 5px 9px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-row);
+  font-size: 0.72rem;
+  border: 1px solid #2f2f2f;
+}
+.c1-pack-item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.c1-pack-item .count { font-family: var(--font-mono); color: var(--text-faint); flex-shrink: 0; }
+.c1-pack-item .remove { color: var(--cat-snare); cursor: pointer; font-size: 0.9rem; font-weight: bold; flex-shrink: 0; background: none; border: none; padding: 0; }
+.c1-pack-empty { color: var(--text-faint); font-size: 0.72rem; text-align: center; padding: 8px 0; }
+
+/* Types tab */
+
+.type-dropdown-wrapper { margin-bottom: 8px; }
+
+.c1-type-select {
+  width: 100%;
+  background: var(--surface-input);
+  border: 1px solid var(--border-input);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 6px 9px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.c1-type-select:focus { border-color: var(--accent); }
+
+.c1-filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+  flex: 1;
+  margin-bottom: 8px;
+}
+
+.c1-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 5px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+.c1-filter-row:hover { background: #262626; }
+
+.c1-filter-chk {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-row);
+}
+.c1-filter-chk input { accent-color: var(--accent); cursor: pointer; }
+.c1-filter-count { font-family: var(--font-mono); color: var(--text-faint); font-size: 0.66rem; }
+
+.cutoff-stepper-box {
+  background: #171820;
+  border: 1px solid #2a2e3d;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-dim);
+  margin-top: auto;
+}
+
+.c1-step-btn {
+  background: #2a2d3a;
+  border: 1px solid #3c4356;
+  color: var(--accent);
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+}
+.c1-step-btn:hover { background: #383d50; }
+
+/* Rules (categorization / aliases) tab */
+
+.c1-cat-select {
+  width: 100%;
+  background: #181818;
+  border: 1px solid #333;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.76rem;
+  padding: 5px 9px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  outline: none;
+  cursor: pointer;
+}
+
+.c1-alias-box {
+  background: #181818;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 6px 7px;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.c1-alias-input {
+  width: 100%;
+  background: #181818;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-row);
+  font-size: 0.7rem;
+  padding: 5px 7px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  outline: none;
+}
+.c1-alias-input:focus { border-color: var(--accent); }
+
+.c1-alias-input-tip {
+  font-size: 0.66rem;
+  color: #777;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.c1-reset-btn {
+  background: transparent;
+  border: 1px solid var(--reset-border);
+  color: var(--reset-text);
+  font-size: 0.66rem;
+  padding: 4px;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+}
+.c1-reset-btn:hover { background: var(--reset-hover-bg); color: var(--reset-hover-text); }
+
+/* Settings tab */
+
+.c1-settings-group { margin-bottom: 14px; }
+
+.c1-settings-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--text-faint);
+  margin-bottom: 5px;
+}
+
+.c1-settings-path {
+  background: #181818;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  padding: 6px 7px;
+  font-size: 0.72rem;
+  color: var(--text-row);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 6px;
+}
+
+.c1-settings-actions { display: flex; gap: 6px; }
+
+/* .c1-step-btn's own rule fixes it at 20x20px for the +/- steppers; these
+   buttons share its look but need to fit "Change…"/"Reset" text, so this
+   overrides sizing back to content-driven (declared after .c1-step-btn in
+   the cascade, same specificity, so it wins). */
+.c1-settings-btn {
+  width: auto;
+  height: auto;
+  padding: 4px 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+/* Info tab */
+
+.c1-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow-y: auto;
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.c1-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 5px;
+  border-radius: 3px;
+  color: #bbb;
+}
+.c1-info-row.empty { color: var(--status-empty-text); background: var(--status-empty-bg); }
+
+/* ---- Mid panel ---- */
+
+.c1-mid {
+  background: var(--surface-panel);
+  border-radius: 5px;
+  border: 1px solid var(--border-subtle);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 10px;
+  min-height: 0;
+}
+
+.c1-reroll-btn {
+  background: var(--accent);
+  color: #1a1102;
+  border: none;
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 12px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 2px 6px var(--accent-glow-strong);
+  transition: transform 0.1s, background 0.1s;
+}
+.c1-reroll-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+.c1-export-btn {
+  background: var(--surface-input);
+  color: var(--text-row);
+  border: 1px solid var(--border-input);
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 10px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: border-color 0.1s, color 0.1s;
+}
+.c1-export-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.c1-export-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* v1.1.0: Max for Live bridge. Send to Rack takes the reroll button's
+   accent treatment (the primary action once a device is connected); Export
+   .adg keeps its existing neutral style and just drops to a secondary role
+   alongside it — see docs/IMPLEMENTATION_PLAN.md's v1.1.0 entry. */
+.c1-send-btn {
+  background: var(--accent);
+  color: #1a1102;
+  border: none;
+  border-radius: 5px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  padding: 10px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-shadow: 0 2px 6px var(--accent-glow-strong);
+  transition: transform 0.1s, background 0.1s;
+}
+.c1-send-btn:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+.c1-send-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+
+.c1-live-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--text-faint);
+}
+.c1-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #666;
+  flex-shrink: 0;
+}
+.c1-live-status.connected .c1-live-dot { background: #4caf50; }
+.c1-live-status.connected { color: var(--text-row); }
+
+.hidden { display: none !important; }
+
+.c1-stats {
+  font-size: 0.76rem;
+  color: var(--text-faint);
+  line-height: 1.45;
+  background: #181818;
+  padding: 7px 9px;
+  border-radius: 4px;
+  border: 1px solid #262626;
+}
+
+.c1-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.c1-toggle input { accent-color: var(--accent); }
+
+.c1-status {
+  background: var(--status-ok-bg);
+  border: 1px solid var(--status-ok-border);
+  color: var(--status-ok-text);
+  font-size: 0.7rem;
+  padding: 7px 7px;
+  border-radius: 4px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* ---- 4x4 pad grid ---- */
+
+.c1-grid {
+  display: grid;
+  /* minmax(0, 1fr), not bare 1fr — a bare 1fr track still has an automatic
+     content-based minimum, so one pad with a long sample name could inflate
+     its whole row/column past the fixed viewport instead of the grid
+     holding its size (see .c1-pad-file below for the other half of this:
+     wrapping the text instead of forcing it wider). */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.c1-pad {
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface-pad);
+  border: 1px solid var(--border-pad);
+  border-radius: 5px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.c1-pad:hover { background: var(--surface-pad-hover); border-color: var(--border-pad-hover); }
+
+.c1-pad.locked {
+  border-color: var(--accent);
+  background: var(--accent-locked-bg);
+  box-shadow: inset 0 0 8px var(--accent-glow);
+}
+
+.c1-pad-top {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+}
+
+.c1-pad-file {
+  /* Takes exactly the leftover vertical space between .c1-pad-top and
+     .c1-pad-bottom (flex: 1 1 auto + min-height: 0, since those two
+     siblings are pinned to their natural size via flex: 0 0 auto) — a
+     stable, predictable box for renderer.js's fitPadFileText to measure
+     against. The pad itself never grows for a long name; instead
+     fitPadFileText shrinks this element's font-size (inline style) until
+     the text fits, only falling back to a truncated "…" if even the
+     smallest readable size still overflows. overflow: hidden here is just
+     a visual safety net for that last-resort case. */
+  flex: 1 1 auto;
+  min-height: 0;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  margin: 3px 0;
+}
+.c1-pad-file.empty { color: var(--text-fainter); font-weight: 400; font-style: italic; }
+
+.c1-pad-bottom {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+}
+
+.c1-pad-note { color: var(--text-fainter); font-size: 0.66rem; font-family: var(--font-mono); }
+.c1-pad.locked .c1-pad-note { color: var(--accent); }
+
+.c1-cat-tag {
+  font-size: 0.64rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Same pill look as .c1-cat-tag, but an actual <select> (v1.1.1) so a pad's
+   sample type can be reassigned in place — native chrome stripped via
+   appearance: none, color comes from the same cat-* classes as the tag.
+   Named distinctly from the Rules tab's .c1-cat-select (a full-width type
+   dropdown, unrelated despite the similar name) — the two collided under
+   one shared class name until this pass, with this pill styling silently
+   winning the cascade and shrinking the Rules tab's dropdown down to pad
+   size. */
+.c1-pad-cat-select {
+  font-size: 0.64rem;
+  padding: 1px 14px 1px 5px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 5'%3E%3Cpath fill='%23888' d='M0 0l4 5 4-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 7px 5px;
+}
+.c1-pad-cat-select:disabled { cursor: default; opacity: 0.7; background-image: none; padding-right: 5px; }
+.c1-pad-cat-select:hover:not(:disabled) { filter: brightness(1.15); }
+
+.cat-kick  { background: color-mix(in srgb, var(--cat-kick) 20%, transparent);  color: var(--cat-kick); }
+.cat-snare { background: color-mix(in srgb, var(--cat-snare) 20%, transparent); color: var(--cat-snare); }
+.cat-hat   { background: color-mix(in srgb, var(--cat-hat) 20%, transparent);   color: var(--cat-hat); }
+.cat-perc  { background: color-mix(in srgb, var(--cat-perc) 20%, transparent);  color: var(--cat-perc); }
+.cat-808   { background: color-mix(in srgb, var(--cat-808) 20%, transparent);   color: var(--cat-808); }
+
+.pad-btn {
+  cursor: pointer;
+  opacity: 0.7;
+  font-size: 0.8rem;
+  padding: 0 2px;
+  background: none;
+  border: none;
+  color: inherit;
+}
+.pad-btn:hover { opacity: 1; color: var(--accent); }
+.pad-btn.lock-icon.locked { color: var(--accent); }

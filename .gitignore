@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+*.exe
+
+# Local data / index
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Secrets / local settings — never pushed
+.env
+.env.*
+settings.json
+electron/settings.json
+
+# Derived from the user's own local Ableton Live Pack install — regenerate
+# with `npm run build:skeleton`, never committed (see electron/export/buildSkeleton.js)
+electron/export/skeleton.adg
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/

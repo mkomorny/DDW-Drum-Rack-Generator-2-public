@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Changes Tracker</title>
+<style>
+  :root{
+    --bg:#12141c;
+    --bg-raised:#181b26;
+    --line:#2a2e3a;
+    --text:#e8e6e0;
+    --text-dim:#9195a3;
+    --accent:#5fa8a0;
+    --accent-dim:#3d6f6a;
+    --amber:#d9a05b;
+    --rose:#c97064;
+    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    padding:32px 20px 80px;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px; margin:0 auto;}
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:20px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+  }
+  h1{
+    font-size:1.5rem;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:var(--text-dim);
+    font-size:0.85rem;
+    font-family:var(--mono);
+  }
+  .sync-note{
+    font-size:0.72rem;
+    color:var(--text-dim);
+    font-family:var(--mono);
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    padding:6px 10px;
+    border-radius:4px;
+    max-width:220px;
+    line-height:1.4;
+  }
+
+  .controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:24px;
+    flex-wrap:wrap;
+  }
+  input, textarea, select{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:0.9rem;
+    padding:9px 11px;
+    border-radius:5px;
+    outline:none;
+  }
+  input:focus, textarea:focus, select:focus{
+    border-color:var(--accent-dim);
+  }
+  .search{flex:1; min-width:160px;}
+  .filter-select{min-width:160px;}
+
+  button{
+    font-family:var(--sans);
+    font-size:0.85rem;
+    font-weight:600;
+    border-radius:5px;
+    border:1px solid transparent;
+    cursor:pointer;
+    padding:9px 16px;
+  }
+  .btn-primary{background:var(--accent); color:#0d1712;}
+  .btn-primary:hover{background:#71bdb4;}
+  .btn-ghost{background:transparent; border-color:var(--line); color:var(--text-dim);}
+  .btn-ghost:hover{color:var(--text); border-color:var(--text-dim);}
+  .btn-danger{background:transparent; color:var(--rose); border-color:var(--rose);}
+  .btn-danger:hover{background:rgba(201,112,100,0.12);}
+
+  form.entry-form{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px;
+    margin-bottom:32px;
+    display:none;
+  }
+  form.entry-form.open{display:block;}
+  .form-row{display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;}
+  .form-row > *{flex:1; min-width:140px;}
+  .form-row label{
+    display:block;
+    font-family:var(--mono);
+    font-size:0.7rem;
+    color:var(--text-dim);
+    margin-bottom:4px;
+  }
+  textarea{width:100%; min-height:70px; resize:vertical; font-family:var(--sans);}
+  .form-actions{display:flex; gap:8px; justify-content:flex-end; margin-top:6px;}
+
+  .project-group{margin-bottom:30px;}
+  .project-title{
+    font-family:var(--mono);
+    font-size:0.95rem;
+    color:var(--amber);
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .project-title::before{content:"#"; opacity:0.6;}
+
+  .log{
+    position:relative;
+    padding-left:22px;
+  }
+  .log::before{
+    content:"";
+    position:absolute;
+    left:5px;
+    top:6px;
+    bottom:6px;
+    width:1px;
+    background:var(--line);
+  }
+  .entry{
+    position:relative;
+    padding-bottom:20px;
+  }
+  .entry::before{
+    content:"";
+    position:absolute;
+    left:-22px;
+    top:5px;
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--accent);
+    border:2px solid var(--bg);
+    box-shadow:0 0 0 1px var(--accent-dim);
+  }
+  .entry-head{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:4px;
+  }
+  .version{
+    font-family:var(--mono);
+    font-weight:600;
+    color:var(--text);
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    padding:1px 7px;
+    border-radius:4px;
+    font-size:0.85rem;
+  }
+  .date{
+    font-family:var(--mono);
+    font-size:0.75rem;
+    color:var(--text-dim);
+  }
+  .desc{
+    font-size:0.9rem;
+    line-height:1.5;
+    color:var(--text);
+    margin:4px 0 8px;
+    white-space:pre-wrap;
+  }
+  .entry-foot{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .repo-link{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    color:var(--accent);
+    text-decoration:none;
+    border-bottom:1px dotted var(--accent-dim);
+  }
+  .repo-link:hover{color:#8fd6cd;}
+  .no-link{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    color:var(--text-dim);
+    font-style:italic;
+  }
+  .entry-actions{
+    margin-left:auto;
+    display:flex;
+    gap:10px;
+  }
+  .icon-btn{
+    background:none;
+    border:none;
+    color:var(--text-dim);
+    font-size:0.75rem;
+    font-family:var(--mono);
+    padding:2px 4px;
+    cursor:pointer;
+  }
+  .icon-btn:hover{color:var(--text);}
+  .icon-btn.danger:hover{color:var(--rose);}
+
+  .empty{
+    text-align:center;
+    color:var(--text-dim);
+    font-family:var(--mono);
+    font-size:0.85rem;
+    padding:60px 20px;
+    border:1px dashed var(--line);
+    border-radius:8px;
+  }
+  .status{
+    font-family:var(--mono);
+    font-size:0.75rem;
+    color:var(--text-dim);
+    margin-bottom:14px;
+    min-height:1em;
+  }
+  .status.error{color:var(--rose);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>App Changes Tracker</h1>
+      <div class="sub">version log · description · repo link</div>
+    </div>
+    <div class="sync-note">Shared log — visible and editable by anyone using this tool, including other sessions or bots you hand it to.</div>
+  </header>
+
+  <div class="status" id="status">Loading entries…</div>
+
+  <div class="controls">
+    <input class="search" id="searchInput" type="text" placeholder="Search project, version, or description…">
+    <select class="filter-select" id="projectFilter">
+      <option value="">All projects</option>
+    </select>
+    <button class="btn-primary" id="addBtn">+ Add version</button>
+  </div>
+
+  <form class="entry-form" id="entryForm">
+    <input type="hidden" id="editId">
+    <div class="form-row">
+      <div>
+        <label for="fProject">Project</label>
+        <input id="fProject" type="text" placeholder="e.g. MindTools Suite" required>
+      </div>
+      <div>
+        <label for="fVersion">Version</label>
+        <input id="fVersion" type="text" placeholder="e.g. v1.4.0" required>
+      </div>
+      <div>
+        <label for="fDate">Date</label>
+        <input id="fDate" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div style="flex:1 1 100%;">
+        <label for="fRepo">GitHub repo link (for this version)</label>
+        <input id="fRepo" type="url" placeholder="https://github.com/user/repo/releases/tag/v1.4.0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div style="flex:1 1 100%;">
+        <label for="fDesc">Description — what changed</label>
+        <textarea id="fDesc" placeholder="What changed in this version, for someone reading the log later…"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn-ghost" id="cancelBtn">Cancel</button>
+      <button type="submit" class="btn-primary" id="saveBtn">Save entry</button>
+    </div>
+  </form>
+
+  <div id="log"></div>
+
+</div>
+
+<script>
+(function(){
+  const statusEl = document.getElementById('status');
+  const logEl = document.getElementById('log');
+  const form = document.getElementById('entryForm');
+  const addBtn = document.getElementById('addBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const searchInput = document.getElementById('searchInput');
+  const projectFilter = document.getElementById('projectFilter');
+  const editIdField = document.getElementById('editId');
+  const STORAGE_KEY = 'app-changes-entries';
+
+  // SEED_ENTRIES is the permanent, git-tracked log. Entries are appended
+  // here directly (by hand, or by whichever tool/bot did the pass) as part
+  // of each version's docs update — never edited or removed, per this
+  // file's own hard rule. localStorage is local-only convenience on top:
+  // browsers isolate storage per file:// origin in ways that make it
+  // unreliable as the source of truth, so it can add or shadow-edit
+  // entries in the browser that opened them, but a seed entry can't be
+  // deleted through the UI, and a fresh clone/open always shows the full
+  // real history regardless of that browser's local storage state.
+  const SEED_ENTRIES = [
+    {
+      id: 'seed-ddw-drg2-v0.1.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v0.1.0',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v0.1.0',
+      description: 'Repo scaffolded (Electron). Design system extracted from the approved mockup into docs/DESIGN.md, src/tokens.css, src/device.css. Device UI rebuilt from that spec (not copy-pasted): all 4 rail tabs (Packs/Types/Rules/Info) and all 3 Type modes (One-Shots/Loops/Other) render and are interactive on mock data. Corrected a pad-note-order bug from the mockup so the grid matches a real Ableton Drum Rack Pad View. Also fixed this Tracker itself, which called a nonexistent window.storage API and silently failed to save any entry in a plain browser.'
+    },
+    {
+      id: 'seed-ddw-drg2-v0.1.1',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v0.1.1',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v0.1.1',
+      description: 'Fixed this Tracker\'s persistence for real: localStorage alone is unreliable across file:// opens, which broke the "permanent log" promise. Entries now live in this embedded SEED_ENTRIES array (git-tracked, portable) with localStorage only layered on top for local-only convenience additions. Seed entries are enforced read-only in the UI — no edit or delete — matching the append-only rule in code, not just by convention.'
+    },
+    {
+      id: 'seed-ddw-drg2-v0.2.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v0.2.0',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v0.2.0',
+      description: 'Packs tab is live: add folders via native picker or drag-and-drop, recursive scan, WAV/AIFF header-only duration parsing (no audio decode), persistent index with incremental rescan (unchanged files skipped, changed files reparsed, deleted files pruned). Mid-panel packs/samples stats now real. Dependency swap from the original plan: uses node:sqlite (built into the Node 24 that Electron 43 bundles) instead of better-sqlite3, since this machine has no Visual Studio Build Tools to compile a native addon against Electron\'s ABI.'
+    },
+    {
+      id: 'seed-ddw-drg2-v0.3.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v0.3.0',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v0.3.0',
+      description: 'Categorization engine + Rules tab are live. Each sample now gets a category (kick/snare/clap/rim/tom/hat/crash/perc) from filename + parent-folder alias matching, with longest-alias-wins conflict resolution and an explicit category priority order for ties. Rules tab edits real aliases (persisted, triggers a full re-categorize) and per-category max length (persisted; not yet enforced anywhere \\u2014 that lands with v0.4.0\'s duration cut-offs). Info tab shows real per-category candidate counts plus an Uncategorized count, replacing the v0.1.0 mock numbers. New samples are categorized automatically right after every scan. sqlite schema gained a category_id column on samples and a category_rules table, with an idempotent migration so an existing v0.2.0 library.db upgrades without a rescan.'
+    },
+    {
+      id: 'seed-ddw-drg2-v0.4.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v0.4.0',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v0.4.0',
+      description: 'Type classification and real Types-tab cut-offs are live. Every sample now gets a Type (One-Shot, Loop, or Other) and a subcategory: a Loop keyword match (loop, break, fill, and similar) wins first; otherwise a sample with a v0.3.0 category becomes a One-Shot if its duration is within that category Rules-tab max length, finally putting max_len_ms to use after it sat persisted-but-unused since v0.3.0; anything left over falls to Other (matched to FX, Atmos, Tonal, Vocal, Tails, or Unclassified). The Types tab now shows real per-subcategory counts, and each type cut-off stepper (Max Duration, Max Loop Bars, Max Tail) is persisted and actually filters those counts instead of relabeling a static mock number. New or rescanned samples are type-classified automatically; editing a category alias list or max length from the Rules tab re-runs it for the whole library, since either can move a sample between buckets. Notice: while preparing this entry, found that the v0.2.0 and v0.3.0 entries above had a stray doubled backslash before an apostrophe left over from an earlier pass, which made this file\'s script throw a syntax error and silently broke the whole Tracker UI on open. Corrected just that one character in each of those two entries (no wording or dates changed) so the page loads again.'
+    },
+    {
+      id: 'seed-ddw-drg2-v0.5.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v0.5.0',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v0.5.0',
+      description: 'The reroll engine, locks, and audition are live \\u2014 the pad grid actually loads real samples now. Each of the 16 pads is pinned to one of the 7 One-Shot subcategories (RIDE and CRASH both draw from Cymbals, TOM LOW/MID/HI all draw from Toms, and so on, since that\'s the finest granularity the classifier tracks); the dice button and Reroll All draw a weighted-random matching sample honoring the Types tab\'s cut-off and any subcategory the user has unchecked there. Locked pads are skipped by Reroll All and can\'t be rerolled individually, and no sample repeats across pads in a single roll (locked pads\' current samples count too). Clicking a pad plays its sample via Web Audio; "Audition on reroll" auto-plays on an individual dice reroll, but deliberately not on Reroll All, since 14 samples firing at once would just be noise. Verified with a mocked-Electron integration test against a real sqlite database covering cut-off filtering, pool exhaustion, disabled-subcategory rejection, no-duplicate-across-pads for both single and Reroll All, and the audio-read path allowlist that stops the renderer from reading arbitrary files off disk.'
+    },
+    {
+      id: 'seed-ddw-drg2-v0.6.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v0.6.0',
+      date: '2026-08-25',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v0.6.0',
+      description: 'Real .adg export. Rather than needing a fresh manual export from the user, the schema template comes from an actual Ableton Live Pack drum rack already on disk (Drum Essentials / 505 Classic Kit.adg, per the user\'s own direction to use a Live Pack rather than a User Library preset), reverse-engineered since the .adg/.als XML format is undocumented: DrumGroupDevice, 16 DrumBranchPreset blocks, each an OriginalSimpler with a MultiSamplePart sample slot and its own ReceivingNote. External sample references use a pattern verified against the user\'s own real, working Live 12.4.3 project rather than guessed. The template itself is never committed to the repo: a build script (npm run build:skeleton, run once locally) strips every piece of the source pack\'s identity, personal creator paths, and tweaked macro settings out of it, leaving only Ableton\'s own mechanical device defaults behind, and refuses to write its output if any leftover identifying content survives a scan; the result is gitignored and regenerated locally, same pattern this project already uses for local DB/settings files. "Export .adg" writes the file via a native save dialog and stays disabled until every pad has a sample, since the researched schema always needs a real sample slot per branch. Verified with a mocked-Electron integration test against a real sqlite database: well-formed output, correct notes/sample paths/frame-accurate durations, incomplete-rack and missing-file rejection, and a cancelled dialog writing nothing. What is not yet verified from this environment: dragging a generated file into real Ableton Live and confirming it loads \\u2014 that is still owed as a real-world check.'
+    },
+    {
+      id: 'seed-ddw-drg2-v1.0.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v1.0.0',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v1.0.0',
+      description: 'Polish + packaging, the last version on the original plan. Settings persistence: the Types tab\'s disabled subcategories and "Audition on reroll" used to reset to defaults every relaunch (an open item since v0.5.0) \\u2014 both now round-trip through a small key/value settings table and load before the first render. Error/empty states: a single pack failing to scan (bad permissions, a path that disappears mid-walk) no longer aborts the whole add/rescan batch or leaves an unhandled rejection in the renderer, the folder-add and drag-and-drop flows now surface a failure as a status message instead of failing silently, the export button\'s disabled tooltip now checks skeleton.adg\'s availability proactively at startup instead of only after a failed export click, and an unfilled pad reads "\\u2014 no sample \\u2014" in dimmed text instead of one of the approved mockup\'s placeholder filenames, which used to make a fresh install\'s pad grid look like it already had real samples loaded. Windows installer: added electron-builder and an NSIS build config (npm run dist:win); actually run in this environment, producing a real ~99 MB installer, not just configured on paper. That installer bundles the user\'s locally-built skeleton.adg (derived from their own licensed Ableton Live Pack, see v0.6.0) if present, so it is documented as personal-use-only, not for redistribution. README rewritten: pruned the five stacked v0.2.0\\u2013v0.6.0 status paragraphs into one current-state description now that the full version history lives permanently in this Tracker. Not done: no custom app icon (falls back to Electron\'s default), and the built installer was not actually run/installed on a real machine from this environment.'
+    },
+    {
+      id: 'seed-ddw-drg2-v1.0.1',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v1.0.1',
+      date: '2026-08-24',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v1.0.1',
+      description: 'First real-world verification pass, and it found a real bug immediately: the user ran the app themselves and sent a screenshot showing the pad grid\'s 4th column hard-clipped at the window edge. Root cause was a classic CSS Grid trap \\u2014 .c1-grid sat in the layout\'s 1fr column, but a grid item\'s implicit min-width:auto meant it refused to shrink below its own pads\' content width and silently overflowed past the window edge (body\'s overflow:hidden then clipped it instead of showing a scrollbar) \\u2014 combined with a default window (900\\u00d7620) that was too narrow for the pad grid even without that bug. Fixed with min-width:0 on .c1-grid so the track actually honors its 1fr sizing, plus a wider default window (1120\\u00d7660) and a higher resize floor (760\\u2192980, since 760 was already narrower than the fixed rail+panel+mid columns alone need). Also shipped the custom app icon flagged as an open item since v1.0.0: a flat drum-and-crossed-sticks glyph built from the app\'s own design tokens (amber accent, dark frame, white sticks) so it reads as the same product as the device UI, authored as an SVG source (build/icon.svg, committed) and rasterized to a multi-resolution .ico via a one-off sharp + png-to-ico script run outside the repo (not added as project dependencies). Wired into both the packaged installer (package.json build.win.icon) and the dev-run window (electron/main.js BrowserWindow icon). In the process, found and fixed a real .gitignore bug: build/ had been lumped in with dist/ and out/ as build output from an earlier pass, but electron-builder\'s own convention uses build/icon.ico as a *source* path it reads from, not something it writes \\u2014 nothing had ever been placed there before so it never surfaced. Also corrected a stale Implementation Plan open item claiming the Types tab\'s disabled-subcategory checkboxes still weren\'t persisted; they actually were, as part of v1.0.0\'s settings work \\u2014 the doc just hadn\'t been updated to say so.'
+    },
+    {
+      id: 'seed-ddw-drg2-v1.1.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v1.1.0',
+      date: '2026-08-25',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v1.1.0',
+      description: 'New feature: an optional Max for Live device that turns "Export .adg, drag it in" into a one-click "Send to Rack" once a Drum Rack is already on the track — no file, no drag. A Phase 0 spike proved the core mechanism first: a throwaway v8 object calling SimplerDevice.replace_sample visibly swapped a real Drum Rack pad\'s sample on this machine\'s Live 12.4.5b11. Mid-plan the user caught that the spike used the wrong device type (Max Audio Effect) against a reference manual for a similar third-party device; corrected to Max MIDI Effect for every .amxd in the project. Electron side: the pad-resolution logic previously inlined in the .adg export handler was extracted into a shared resolvePads() so a .adg export and a live send can never disagree about what a pad resolves to; a small bridge/client.js reads a handshake file the M4L device writes to this app\'s appData folder and talks plain HTTP to it; a Send to Rack button appears next to Export .adg only once a device reports itself connected (polled every 4s), with a live "rack name — N/16 pads" indicator. M4L side: ddw-bridge.js (Node for Max) hosts a token-protected HTTP server and correlates requests with ddw-live.js (the only object allowed to touch the Live API) over the patch cords between them; ddw-live.js generalizes the spike\'s single hardcoded pad to all 16 (notes 36–51). Biggest environment-specific discovery: Live\'s embedded Max-for-Live editor can\'t be reliably automated here (keyboard input intermittently blocked, full-window screenshots render solid black), so every .amxd in this project is hand-authored — a .amxd is just three binary chunks (ampf/meta/ptch) wrapping a plain-text JSON patcher body, built with a small Node script and loaded into Live via the browser, never via copy/paste into the editor. Second major discovery, and the actual blocker for most of this pass: node.script silently does nothing at all — no error, no console output, box renders with zero indication anything is wrong — unless its saved_object_attributes.autostart is explicitly set to 1. Verified end-to-end against the real shipped files (not the spike): loaded the real .amxd onto a track with a factory-populated Drum Rack, queried /status and /load directly over HTTP with the real handshake token, and visually confirmed all 16 pads\' Simplers swapped, both via each Simpler\'s title bar and the Drum Rack\'s pad grid labels.'
+    },
+    {
+      id: 'seed-ddw-drg2-v1.2.0',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v1.2.0',
+      date: '2026-08-25',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v1.2.0',
+      description: 'Two user-requested features, a layout fix, and a new Settings tab. Export .adg and Send to Rack no longer require all 16 pads filled — only a completely empty rack blocks either now; an unfilled pad\'s exported DrumBranchPreset branch is written back out exactly as the skeleton template\'s own pristine, never-patched "unassigned" state rather than inventing new XML for "empty," and an unfilled pad sent to Live is simply left out of the request so the corresponding Live pad keeps whatever it already had. Each pad\'s category tag is now a live dropdown instead of fixed text, so a pad can be reassigned to a different One-Shot subcategory after the fact (clearing its current sample, since a sample matched to the old subcategory isn\'t guaranteed to fit the new one) instead of only ever rerolling within the role it started with. Fixed a real layout bug the user reported: a long sample filename could inflate the whole pad grid past the fixed window instead of staying put, root-caused to a CSS Grid trap (a bare 1fr track keeps a content-based minimum size unless wrapped as minmax(0, 1fr)) plus single-line text truncation; fixed with minmax(0, 1fr) grid tracks and — per the user\'s specific ask that the pad box never resize and the text adapt instead — a new per-pad JS routine that shrinks each sample name\'s font-size to fit its now-fixed box after every render and on window resize, only falling back to a trimmed "…" if it\'s still overflowing at an unreadably small floor size. New Settings tab: a configurable default export folder (used by the .adg save dialog instead of always defaulting to Documents), and a "Reset library database" action for recovering from a corrupted library.db from inside the app, which closes and deletes the sqlite file (and its WAL sidecars) without touching any actual sample files or pack folders on disk — built in direct response to this machine\'s own library.db turning up corrupted (real page-level damage isolated to the samples table, consistent with an interrupted write rather than anything the app did) mid-session; the live corrupted file itself is still owed an actual reset as a manual follow-up, since too many app instances were open and Windows held it locked. Also fixed a real naming collision found while building the above: the Rules tab\'s category dropdown and the new pad-retype dropdown both used the class c1-cat-select, and the pad\'s pill styling was silently winning the CSS cascade and shrinking the Rules tab\'s dropdown down to pill size — renamed the pad one to keep them apart for good. Also carried over and shipped an M4L device UI fix from earlier in this same unreleased stretch of work: the device now opens in presentation mode with a real minimal view (title, a status line, an Open DDW button) instead of its full unarranged patcher.'
+    },
+    {
+      id: 'seed-ddw-drg2-v1.2.1',
+      project: 'DDW Drum Rack Generator 2',
+      version: 'v1.2.1',
+      date: '2026-08-25',
+      repoUrl: 'https://github.com/mkomorny/DDW-Drum-Rack-Generator-2/releases/tag/v1.2.1',
+      description: 'The user reported that none of v1.2.0\'s features (Settings tab, pad-text-shrink, pad category retype) showed up at all after reloading the M4L device with a populated Drum Rack, which looked like a shipped-but-broken release. It wasn\'t a code bug: the .amxd device\'s "Open DDW" button launches whichever .exe is installed at %LOCALAPPDATA%\\Programs\\DDW Drum Rack Generator\\, completely independent of the source tree, and that installer had last been built at 11:17am that day — producing v1.1.0 — over an hour *before* the v1.2.0 commit landed later the same day. Confirmed the M4L side was never at fault by diffing ddw-bridge.js, ddw-live.js, and the .amxd itself against the copies sitting in the user\'s Live User Library (byte-for-byte identical) and by reading dist/latest.yml, which still read version: 1.1.0. Fixed by rebuilding the installer from current source and reinstalling, then verifying the fix landed by grepping the newly-installed app.asar directly for rail-btn-settings, fitPadFileText, and c1-pad-cat-select and finding all three present. This closes a real process gap rather than just a one-off mistake: the git commit/tag/push ritual only makes a restorable snapshot in GitHub history, it does not get a fix onto the actual running app, so rebuilding the installer (npm run dist:win) and reinstalling is now a required last step whenever a change touches src/ or electron/, not an optional afterthought. While diagnosing, the user also flagged two smaller issues found in the same session: the Settings tab\'s "default export folder set to…" confirmation message was overflowing out of its fixed-width column and visually overlapping the pad grid, because a Windows folder path has no spaces and browsers won\'t wrap an unbroken token without being told to — the same underlying issue already fixed for pad sample names in v1.2.0, just not yet applied to this second element; fixed with overflow-wrap: anywhere on .c1-status. And the "add sample pack" folder picker always opened to the OS default location instead of where the user\'s sample packs actually live — given a hardcoded defaultPath of A:\\Samples_Packs.'
+    }
+  ];
+
+  let entries = [];
+
+  function setStatus(msg, isError){
+    statusEl.textContent = msg || '';
+    statusEl.className = 'status' + (isError ? ' error' : '');
+  }
+
+  function uid(){
+    return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  function seedIds(){
+    return new Set(SEED_ENTRIES.map(en => en.id));
+  }
+
+  async function loadEntries(){
+    setStatus('Loading entries…');
+    const byId = new Map(SEED_ENTRIES.map(en => [en.id, en]));
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const local = raw ? JSON.parse(raw) : [];
+      local.forEach(en => byId.set(en.id, en)); // local entries add or shadow-edit; never removes a seed row
+      entries = Array.from(byId.values());
+      setStatus(entries.length ? '' : 'No entries yet.');
+    }catch(err){
+      entries = SEED_ENTRIES.slice();
+      setStatus('');
+    }
+    render();
+  }
+
+  async function saveEntries(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      return true;
+    }catch(err){
+      setStatus('Save failed — your change may not persist. Try again.', true);
+      return false;
+    }
+  }
+
+  function openForm(entry){
+    form.classList.add('open');
+    if(entry){
+      editIdField.value = entry.id;
+      document.getElementById('fProject').value = entry.project;
+      document.getElementById('fVersion').value = entry.version;
+      document.getElementById('fDate').value = entry.date || '';
+      document.getElementById('fRepo').value = entry.repoUrl || '';
+      document.getElementById('fDesc').value = entry.description || '';
+    } else {
+      editIdField.value = '';
+      form.reset();
+      document.getElementById('fDate').value = new Date().toISOString().slice(0,10);
+    }
+    document.getElementById('fProject').focus();
+  }
+
+  function closeForm(){
+    form.classList.remove('open');
+    form.reset();
+    editIdField.value = '';
+  }
+
+  addBtn.addEventListener('click', () => openForm(null));
+  cancelBtn.addEventListener('click', closeForm);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = editIdField.value;
+    const data = {
+      project: document.getElementById('fProject').value.trim(),
+      version: document.getElementById('fVersion').value.trim(),
+      date: document.getElementById('fDate').value,
+      repoUrl: document.getElementById('fRepo').value.trim(),
+      description: document.getElementById('fDesc').value.trim()
+    };
+    if(!data.project || !data.version){
+      setStatus('Project and version are required.', true);
+      return;
+    }
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    if(id){
+      const idx = entries.findIndex(en => en.id === id);
+      if(idx > -1) entries[idx] = Object.assign({}, entries[idx], data);
+    } else {
+      entries.push(Object.assign({id: uid()}, data));
+    }
+
+    const ok = await saveEntries();
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save entry';
+    if(ok){
+      setStatus('');
+      closeForm();
+      render();
+    }
+  });
+
+  async function deleteEntry(id){
+    if(seedIds().has(id)){
+      setStatus('This is a permanent log entry (part of the committed history) and can\'t be deleted here.', true);
+      return;
+    }
+    const prev = entries.slice();
+    entries = entries.filter(en => en.id !== id);
+    render();
+    const ok = await saveEntries();
+    if(!ok){
+      entries = prev;
+      render();
+    }
+  }
+
+  function escapeHtml(str){
+    return (str || '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    }[c]));
+  }
+
+  function fmtDate(d){
+    if(!d) return '';
+    const parts = d.split('-');
+    if(parts.length !== 3) return d;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[parseInt(parts[1],10)-1] + ' ' + parseInt(parts[2],10) + ', ' + parts[0];
+  }
+
+  function render(){
+    const query = searchInput.value.trim().toLowerCase();
+    const projFilter = projectFilter.value;
+
+    const projects = [...new Set(entries.map(e => e.project))].sort((a,b) => a.localeCompare(b));
+    const currentFilterVal = projectFilter.value;
+    projectFilter.innerHTML = '<option value="">All projects</option>' +
+      projects.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('');
+    projectFilter.value = projects.includes(currentFilterVal) ? currentFilterVal : '';
+
+    let filtered = entries.filter(en => {
+      if(projFilter && en.project !== projFilter) return false;
+      if(query){
+        const hay = (en.project + ' ' + en.version + ' ' + en.description).toLowerCase();
+        if(!hay.includes(query)) return false;
+      }
+      return true;
+    });
+
+    if(entries.length === 0){
+      logEl.innerHTML = '<div class="empty">No versions logged yet.<br>Click "+ Add version" to start the log.</div>';
+      return;
+    }
+    if(filtered.length === 0){
+      logEl.innerHTML = '<div class="empty">No entries match your search.</div>';
+      return;
+    }
+
+    const grouped = {};
+    filtered.forEach(en => {
+      if(!grouped[en.project]) grouped[en.project] = [];
+      grouped[en.project].push(en);
+    });
+
+    const groupNames = Object.keys(grouped).sort((a,b) => a.localeCompare(b));
+
+    logEl.innerHTML = groupNames.map(project => {
+      const list = grouped[project].slice().sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+      const rows = list.map(en => `
+        <div class="entry" data-id="${en.id}">
+          <div class="entry-head">
+            <span class="version">${escapeHtml(en.version)}</span>
+            <span class="date">${escapeHtml(fmtDate(en.date))}</span>
+          </div>
+          ${en.description ? `<div class="desc">${escapeHtml(en.description)}</div>` : ''}
+          <div class="entry-foot">
+            ${en.repoUrl
+              ? `<a class="repo-link" href="${escapeHtml(en.repoUrl)}" target="_blank" rel="noopener">${escapeHtml(en.repoUrl)}</a>`
+              : `<span class="no-link">no repo link</span>`}
+            <span class="entry-actions">
+              <button class="icon-btn edit-btn">edit</button>
+              <button class="icon-btn danger del-btn">delete</button>
+            </span>
+          </div>
+        </div>
+      `).join('');
+      return `
+        <div class="project-group">
+          <div class="project-title">${escapeHtml(project)}</div>
+          <div class="log">${rows}</div>
+        </div>
+      `;
+    }).join('');
+
+    logEl.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.closest('.entry').dataset.id;
+        if(seedIds().has(id)){
+          setStatus('This is a permanent log entry (part of the committed history) and can\'t be edited here.', true);
+          return;
+        }
+        const en = entries.find(x => x.id === id);
+        if(en) openForm(en);
+      });
+    });
+    logEl.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.target.closest('.entry').dataset.id;
+        if(confirm('Delete this entry?')) deleteEntry(id);
+      });
+    });
+  }
+
+  searchInput.addEventListener('input', render);
+  projectFilter.addEventListener('change', render);
+
+  loadEntries();
+})();
+</script>
+</body>
+</html>

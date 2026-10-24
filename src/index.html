@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>DDW Drum Rack Generator</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="device.css">
+</head>
+<body>
+
+<div class="ableton-device-frame">
+  <div class="ableton-title-bar">
+    <div><span class="device-power-led"></span><span class="device-name">DDW Drum Rack Generator</span></div>
+    <div id="live-tab-indicator">TAB: TYPE OPTIONS (LOOPS / ONE-SHOTS / OTHER)</div>
+  </div>
+  <div class="device-viewport">
+    <div class="c1-layout">
+
+      <div class="c1-rail">
+        <button class="c1-rail-btn" id="rail-btn-folder" data-tab="folder" title="Folders">
+          <span>&#128193;</span><span class="label">Packs</span>
+        </button>
+        <button class="c1-rail-btn active" id="rail-btn-types" data-tab="types" title="Types / Filters">
+          <span>&#127991;&#65039;</span><span class="label">Types</span>
+        </button>
+        <button class="c1-rail-btn" id="rail-btn-categories" data-tab="categories" title="Categorization">
+          <span>&#9881;&#65039;</span><span class="label">Rules</span>
+        </button>
+        <button class="c1-rail-btn" id="rail-btn-info" data-tab="info" title="Info &amp; Telemetry">
+          <span>&#8505;&#65039;</span><span class="label">Info</span>
+        </button>
+        <button class="c1-rail-btn" id="rail-btn-settings" data-tab="settings" title="Settings">
+          <span>&#128295;</span><span class="label">Settings</span>
+        </button>
+      </div>
+
+      <div class="c1-panel" id="panel-content"></div>
+
+      <div class="c1-mid">
+        <button class="c1-reroll-btn" id="reroll-btn">
+          <span>&#127922;</span> Reroll all
+        </button>
+        <button class="c1-send-btn hidden" id="send-to-rack-btn" title="">
+          <span>&#127908;</span> Send to Rack
+        </button>
+        <button class="c1-export-btn" id="export-btn" title="Every pad needs a sample first — Reroll all to fill the rack.">
+          <span>&#128190;</span> Export .adg
+        </button>
+        <div class="c1-live-status hidden" id="live-status">
+          <span class="c1-live-dot" id="live-dot"></span><span id="live-status-text"></span>
+        </div>
+        <div class="c1-stats" id="stats-box">
+          <div><strong id="stats-packs">0</strong> packs loaded</div>
+          <div><strong id="stats-samples">0</strong> samples</div>
+        </div>
+        <label class="c1-toggle">
+          <input type="checkbox" id="audition-chk" checked>
+          <span>Audition on reroll</span>
+        </label>
+        <div class="c1-status" id="status-box">Ready.</div>
+      </div>
+
+      <div class="c1-grid" id="pad-grid"></div>
+
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>
